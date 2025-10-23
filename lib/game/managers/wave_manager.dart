@@ -52,20 +52,41 @@ class WaveManager {
       });
     }
 
-    // Spawn enemies at edge positions
-    final arenaRadius = 400.0;
+    // Spawn enemies from settlements
     final random = Random();
 
-    enemiesToSpawn.forEach((enemyType, count) {
-      for (int i = 0; i < count; i++) {
-        final angle = random.nextDouble() * 2 * pi;
-        final spawnX = cos(angle) * arenaRadius;
-        final spawnY = sin(angle) * arenaRadius;
+    if (game.settlements.isEmpty) {
+      // Fallback to old behavior if no settlements exist
+      final arenaRadius = 400.0;
+      enemiesToSpawn.forEach((enemyType, count) {
+        for (int i = 0; i < count; i++) {
+          final angle = random.nextDouble() * 2 * pi;
+          final spawnX = cos(angle) * arenaRadius;
+          final spawnY = sin(angle) * arenaRadius;
 
-        game.spawnEnemy(enemyType, Vector2(spawnX, spawnY), hpMultiplier);
-        enemiesAlive++;
-      }
-    });
+          game.spawnEnemy(enemyType, Vector2(spawnX, spawnY), hpMultiplier);
+          enemiesAlive++;
+        }
+      });
+    } else {
+      // Spawn enemies from random settlements
+      enemiesToSpawn.forEach((enemyType, count) {
+        for (int i = 0; i < count; i++) {
+          // Pick a random settlement
+          final settlement =
+              game.settlements[random.nextInt(game.settlements.length)];
+
+          // Spawn at or near the settlement position
+          // Add slight random offset to avoid all enemies stacking
+          final offsetX = (random.nextDouble() - 0.5) * 20;
+          final offsetY = (random.nextDouble() - 0.5) * 20;
+          final spawnPos = settlement.position + Vector2(offsetX, offsetY);
+
+          game.spawnEnemy(enemyType, spawnPos, hpMultiplier);
+          enemiesAlive++;
+        }
+      });
+    }
 
     waveInProgress = true;
     currentWaveIndex++;

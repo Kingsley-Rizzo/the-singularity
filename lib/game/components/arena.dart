@@ -20,16 +20,7 @@ class ArenaComponent extends PositionComponent
   void render(Canvas canvas) {
     super.render(canvas);
 
-    final paint = Paint()
-      ..color = Colors.white.withOpacity(0.2)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2;
-
-    // Draw circle centered at component position
-    canvas.drawCircle(
-      Offset(radius, radius), // Center within the component's bounds
-      radius,
-      paint,
-    );
+    // Arena boundary circle removed - settlements now define the play area
+    // Keeping component for potential future use (fog of war, etc.)
   }
 }

@@ -15,12 +15,16 @@ import 'components/enemy.dart';
 import 'components/enemies/hacker.dart';
 import 'components/enemies/saboteur.dart';
 import 'components/enemies/philosopher.dart';
+import 'components/settlement.dart';
 
 class SingularityGame extends FlameGame with TapCallbacks, HoverCallbacks {
   late ResourceManager resourceManager;
   late WaveManager waveManager;
   late BuildManager buildManager;
   late AgiHubComponent hub;
+
+  // List of settlements where enemies spawn
+  final List<Settlement> settlements = [];
 
   double tickAccumulator = 0;
   late int tickMs;
@@ -55,6 +59,9 @@ class SingularityGame extends FlameGame with TapCallbacks, HoverCallbacks {
     hub = AgiHubComponent();
     world.add(hub);
 
+    // Add settlements at the edge of the screen
+    _createSettlements();
+
     // Setup camera to center on (0,0) world position
     camera.viewfinder.anchor = Anchor.center;
     camera.viewfinder.position = Vector2.zero();
@@ -81,6 +88,35 @@ class SingularityGame extends FlameGame with TapCallbacks, HoverCallbacks {
 
     // Update wave manager
     waveManager.update(dt);
+  }
+
+  void _createSettlements() {
+    // Create settlements at the edges of the rectangular screen
+    // Base design is 1280x720, so from center the edges are at approximately:
+    // X: ±600 (slightly inside ±640 for visibility)
+    // Y: ±330 (slightly inside ±360 for visibility)
+    final edgeX = 600.0;
+    final edgeY = 330.0;
+
+    final settlementPositions = [
+      // Corners
+      Vector2(edgeX, edgeY), // Bottom-right
+      Vector2(-edgeX, edgeY), // Bottom-left
+      Vector2(edgeX, -edgeY), // Top-right
+      Vector2(-edgeX, -edgeY), // Top-left
+
+      // Mid-edges (additional settlements for more spawn variety)
+      Vector2(edgeX, 0), // Right edge center
+      Vector2(-edgeX, 0), // Left edge center
+      Vector2(0, edgeY), // Bottom edge center
+      Vector2(0, -edgeY), // Top edge center
+    ];
+
+    for (final pos in settlementPositions) {
+      final settlement = Settlement()..position = pos;
+      settlements.add(settlement);
+      world.add(settlement);
+    }
   }
 
   void processTick() {
@@ -216,7 +252,7 @@ class SingularityGame extends FlameGame with TapCallbacks, HoverCallbacks {
   }
 
   void resetGame() {
-    // Remove all components except hub
+    // Remove all components except hub and settlements
     world.children
         .whereType<EnemyComponent>()
         .toList()
