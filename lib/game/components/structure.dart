@@ -11,6 +11,7 @@ abstract class StructureComponent extends PositionComponent
   late int upkeepEnergy;
   late int moneyPerTick;
   late int energyPerTick;
+  late double agiPerTick;
   double structureSize = 30.0;
 
   bool isDestroyed = false;
@@ -25,6 +26,7 @@ abstract class StructureComponent extends PositionComponent
     upkeepEnergy = config.upkeepEnergy;
     moneyPerTick = config.moneyPerTick;
     energyPerTick = config.energyPerTick;
+    agiPerTick = config.agiPerTick;
     size = Vector2.all(structureSize);
 
     gameRef.buildManager.registerStructure(this);

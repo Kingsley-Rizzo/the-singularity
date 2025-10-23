@@ -87,6 +87,10 @@ class SingularityGame extends FlameGame with TapCallbacks, HoverCallbacks {
     int moneyGain = 0;
     int energyGain = 0;
     int totalUpkeep = 0;
+    double agiGain = 0;
+
+    // Add passive money income
+    moneyGain += ConfigLoader.balance.economy.passiveMoneyPerTick;
 
     // Calculate income from structures
     for (final structure in buildManager.structures) {
@@ -94,6 +98,11 @@ class SingularityGame extends FlameGame with TapCallbacks, HoverCallbacks {
         moneyGain += structure.moneyPerTick;
         energyGain += structure.energyPerTick;
         totalUpkeep += structure.upkeepEnergy;
+
+        // Server farms produce AGI (only if power is OK)
+        if (resourceManager.isPowerOk) {
+          agiGain += structure.agiPerTick;
+        }
       }
     }
 
@@ -105,9 +114,8 @@ class SingularityGame extends FlameGame with TapCallbacks, HoverCallbacks {
     // Check power status
     resourceManager.checkPowerStatus(DateTime.now().millisecondsSinceEpoch);
 
-    // Add passive AGI if power is OK
-    if (resourceManager.isPowerOk) {
-      final agiGain = ConfigLoader.balance.agi.passivePerTick;
+    // Add AGI from server farms (only if power is OK)
+    if (resourceManager.isPowerOk && agiGain > 0) {
       resourceManager.addAgi(agiGain);
     }
   }

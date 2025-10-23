@@ -32,17 +32,11 @@ class AgiConfig {
   final double winPercent;
   @JsonKey(name: 'loss_percent')
   final double lossPercent;
-  @JsonKey(name: 'passive_per_tick')
-  final double passivePerTick;
-  @JsonKey(name: 'wave_clear_bonus')
-  final double waveClearBonus;
 
   AgiConfig({
     required this.startPercent,
     required this.winPercent,
     required this.lossPercent,
-    required this.passivePerTick,
-    required this.waveClearBonus,
   });
 
   factory AgiConfig.fromJson(Map<String, dynamic> json) =>
@@ -56,6 +50,8 @@ class EconomyConfig {
   final int startMoney;
   @JsonKey(name: 'start_energy')
   final int startEnergy;
+  @JsonKey(name: 'passive_money_per_tick')
+  final int passiveMoneyPerTick;
   @JsonKey(name: 'sell_refund_ratio')
   final double sellRefundRatio;
   @JsonKey(name: 'outage_grace_ms')
@@ -64,6 +60,7 @@ class EconomyConfig {
   EconomyConfig({
     required this.startMoney,
     required this.startEnergy,
+    required this.passiveMoneyPerTick,
     required this.sellRefundRatio,
     required this.outageGraceMs,
   });
@@ -83,6 +80,8 @@ class StructureConfig {
   final int moneyPerTick;
   @JsonKey(name: 'energy_per_tick')
   final int energyPerTick;
+  @JsonKey(name: 'agi_per_tick')
+  final double agiPerTick;
   final double? range;
   @JsonKey(name: 'fire_interval_ms')
   final int? fireIntervalMs;
@@ -97,6 +96,7 @@ class StructureConfig {
     required this.upkeepEnergy,
     required this.moneyPerTick,
     required this.energyPerTick,
+    required this.agiPerTick,
     this.range,
     this.fireIntervalMs,
     this.projectileDamage,

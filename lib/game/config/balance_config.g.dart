@@ -33,22 +33,19 @@ AgiConfig _$AgiConfigFromJson(Map<String, dynamic> json) => AgiConfig(
       startPercent: (json['start_percent'] as num).toDouble(),
       winPercent: (json['win_percent'] as num).toDouble(),
       lossPercent: (json['loss_percent'] as num).toDouble(),
-      passivePerTick: (json['passive_per_tick'] as num).toDouble(),
-      waveClearBonus: (json['wave_clear_bonus'] as num).toDouble(),
     );
 
 Map<String, dynamic> _$AgiConfigToJson(AgiConfig instance) => <String, dynamic>{
       'start_percent': instance.startPercent,
       'win_percent': instance.winPercent,
       'loss_percent': instance.lossPercent,
-      'passive_per_tick': instance.passivePerTick,
-      'wave_clear_bonus': instance.waveClearBonus,
     };
 
 EconomyConfig _$EconomyConfigFromJson(Map<String, dynamic> json) =>
     EconomyConfig(
       startMoney: (json['start_money'] as num).toInt(),
       startEnergy: (json['start_energy'] as num).toInt(),
+      passiveMoneyPerTick: (json['passive_money_per_tick'] as num).toInt(),
       sellRefundRatio: (json['sell_refund_ratio'] as num).toDouble(),
       outageGraceMs: (json['outage_grace_ms'] as num).toInt(),
     );
@@ -57,6 +54,7 @@ Map<String, dynamic> _$EconomyConfigToJson(EconomyConfig instance) =>
     <String, dynamic>{
       'start_money': instance.startMoney,
       'start_energy': instance.startEnergy,
+      'passive_money_per_tick': instance.passiveMoneyPerTick,
       'sell_refund_ratio': instance.sellRefundRatio,
       'outage_grace_ms': instance.outageGraceMs,
     };
@@ -68,6 +66,7 @@ StructureConfig _$StructureConfigFromJson(Map<String, dynamic> json) =>
       upkeepEnergy: (json['upkeep_energy'] as num).toInt(),
       moneyPerTick: (json['money_per_tick'] as num).toInt(),
       energyPerTick: (json['energy_per_tick'] as num).toInt(),
+      agiPerTick: (json['agi_per_tick'] as num).toDouble(),
       range: (json['range'] as num?)?.toDouble(),
       fireIntervalMs: (json['fire_interval_ms'] as num?)?.toInt(),
       projectileDamage: (json['projectile_damage'] as num?)?.toInt(),
@@ -81,6 +80,7 @@ Map<String, dynamic> _$StructureConfigToJson(StructureConfig instance) =>
       'upkeep_energy': instance.upkeepEnergy,
       'money_per_tick': instance.moneyPerTick,
       'energy_per_tick': instance.energyPerTick,
+      'agi_per_tick': instance.agiPerTick,
       'range': instance.range,
       'fire_interval_ms': instance.fireIntervalMs,
       'projectile_damage': instance.projectileDamage,

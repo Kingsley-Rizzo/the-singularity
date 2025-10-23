@@ -78,9 +78,7 @@ class WaveManager {
   void onWaveCleared() {
     waveInProgress = false;
 
-    // Grant AGI bonus
-    final bonus = ConfigLoader.balance.agi.waveClearBonus;
-    game.resourceManager.addAgi(bonus);
+    // Wave cleared - no bonus AGI (AGI only comes from Server Farms now)
   }
 
   void reset() {
