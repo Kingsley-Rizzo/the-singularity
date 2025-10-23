@@ -3,20 +3,23 @@ import '../config/config_loader.dart';
 
 class ResourceManager extends ChangeNotifier {
   int _money = 200; // Default starting values
-  int _energy = 20;
+  int _energyBudget = 20;
+  int _energyReserved = 0;
   double _agiPercent = 5.0;
   bool _isPowerOk = true;
-  int _negativeEnergyStartTime = 0;
+  int _overBudgetStartTime = 0;
 
   int get money => _money;
-  int get energy => _energy;
+  int get energyBudget => _energyBudget;
+  int get energyReserved => _energyReserved;
   double get agiPercent => _agiPercent;
   bool get isPowerOk => _isPowerOk;
 
   void initialize() {
     final config = ConfigLoader.balance;
     _money = config.economy.startMoney;
-    _energy = config.economy.startEnergy;
+    _energyBudget = config.economy.baseEnergyBudget;
+    _energyReserved = 0;
     _agiPercent = config.agi.startPercent;
     _isPowerOk = true;
     notifyListeners();
@@ -34,13 +37,13 @@ class ResourceManager extends ChangeNotifier {
     notifyListeners();
   }
 
-  void addEnergy(int amount) {
-    _energy += amount;
+  void setEnergyBudget(int budget) {
+    _energyBudget = budget;
     notifyListeners();
   }
 
-  void removeEnergy(int amount) {
-    _energy -= amount;
+  void setEnergyReserved(int reserved) {
+    _energyReserved = reserved;
     notifyListeners();
   }
 
@@ -57,20 +60,19 @@ class ResourceManager extends ChangeNotifier {
   void checkPowerStatus(int currentTime) {
     final config = ConfigLoader.balance;
 
-    if (_energy < 0) {
+    if (_energyReserved > _energyBudget) {
       if (_isPowerOk) {
-        _negativeEnergyStartTime = currentTime;
+        _overBudgetStartTime = currentTime;
         _isPowerOk = false;
       } else {
         // Check if grace period has expired
-        if (currentTime - _negativeEnergyStartTime >
-            config.economy.outageGraceMs) {
+        if (currentTime - _overBudgetStartTime > config.economy.outageGraceMs) {
           // Brownout active
         }
       }
     } else {
       _isPowerOk = true;
-      _negativeEnergyStartTime = 0;
+      _overBudgetStartTime = 0;
     }
     notifyListeners();
   }

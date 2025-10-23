@@ -8,9 +8,9 @@ abstract class StructureComponent extends PositionComponent
   final String structureType;
   late double maxHp;
   late double currentHp;
-  late int upkeepEnergy;
+  late int energyReserve;
+  late int energyBudgetIncrease;
   late int moneyPerTick;
-  late int energyPerTick;
   late double agiPerTick;
   double structureSize = 30.0;
 
@@ -23,9 +23,9 @@ abstract class StructureComponent extends PositionComponent
     final config = ConfigLoader.balance.structures[structureType]!;
     maxHp = config.hp.toDouble();
     currentHp = maxHp;
-    upkeepEnergy = config.upkeepEnergy;
+    energyReserve = config.energyReserve;
+    energyBudgetIncrease = config.energyBudgetIncrease;
     moneyPerTick = config.moneyPerTick;
-    energyPerTick = config.energyPerTick;
     agiPerTick = config.agiPerTick;
     size = Vector2.all(structureSize);
 

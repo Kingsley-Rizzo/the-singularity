@@ -7,7 +7,7 @@
   },
   "economy": {
     "start_money": 200,
-    "start_energy": 20,
+    "base_energy_budget": 20,
     "passive_money_per_tick": 2,
     "sell_refund_ratio": 0.5,
     "outage_grace_ms": 1500
@@ -16,25 +16,25 @@
     "server_farm": {
       "hp": 100,
       "cost": 100,
-      "upkeep_energy": 10,
+      "energy_reserve": 10,
+      "energy_budget_increase": 0,
       "money_per_tick": 0,
-      "energy_per_tick": 0,
       "agi_per_tick": 0.5
     },
     "energy_plant": {
       "hp": 100,
       "cost": 75,
-      "upkeep_energy": 0,
+      "energy_reserve": 0,
+      "energy_budget_increase": 20,
       "money_per_tick": 0,
-      "energy_per_tick": 8,
       "agi_per_tick": 0
     },
     "turret": {
       "hp": 100,
       "cost": 50,
-      "upkeep_energy": 5,
+      "energy_reserve": 5,
+      "energy_budget_increase": 0,
       "money_per_tick": 0,
-      "energy_per_tick": 0,
       "agi_per_tick": 0,
       "range": 140.0,
       "fire_interval_ms": 600,

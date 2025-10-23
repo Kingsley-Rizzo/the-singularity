@@ -48,8 +48,8 @@ class AgiConfig {
 class EconomyConfig {
   @JsonKey(name: 'start_money')
   final int startMoney;
-  @JsonKey(name: 'start_energy')
-  final int startEnergy;
+  @JsonKey(name: 'base_energy_budget')
+  final int baseEnergyBudget;
   @JsonKey(name: 'passive_money_per_tick')
   final int passiveMoneyPerTick;
   @JsonKey(name: 'sell_refund_ratio')
@@ -59,7 +59,7 @@ class EconomyConfig {
 
   EconomyConfig({
     required this.startMoney,
-    required this.startEnergy,
+    required this.baseEnergyBudget,
     required this.passiveMoneyPerTick,
     required this.sellRefundRatio,
     required this.outageGraceMs,
@@ -74,12 +74,12 @@ class EconomyConfig {
 class StructureConfig {
   final int hp;
   final int cost;
-  @JsonKey(name: 'upkeep_energy')
-  final int upkeepEnergy;
+  @JsonKey(name: 'energy_reserve')
+  final int energyReserve;
+  @JsonKey(name: 'energy_budget_increase')
+  final int energyBudgetIncrease;
   @JsonKey(name: 'money_per_tick')
   final int moneyPerTick;
-  @JsonKey(name: 'energy_per_tick')
-  final int energyPerTick;
   @JsonKey(name: 'agi_per_tick')
   final double agiPerTick;
   final double? range;
@@ -93,9 +93,9 @@ class StructureConfig {
   StructureConfig({
     required this.hp,
     required this.cost,
-    required this.upkeepEnergy,
+    required this.energyReserve,
+    required this.energyBudgetIncrease,
     required this.moneyPerTick,
-    required this.energyPerTick,
     required this.agiPerTick,
     this.range,
     this.fireIntervalMs,

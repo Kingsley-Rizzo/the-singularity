@@ -37,8 +37,10 @@ class GameHUD extends StatelessWidget {
                         _buildResourceDisplay(
                           Icons.bolt,
                           'Energy',
-                          resources.energy.toString(),
-                          resources.energy >= 0 ? Colors.yellow : Colors.red,
+                          '${resources.energyReserved}/${resources.energyBudget}',
+                          resources.energyReserved <= resources.energyBudget
+                              ? Colors.yellow
+                              : Colors.red,
                         ),
                         _buildResourceDisplay(
                           Icons.psychology,

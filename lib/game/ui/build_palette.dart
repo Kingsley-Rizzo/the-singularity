@@ -75,7 +75,7 @@ class BuildPalette extends StatelessWidget {
   ) {
     final config = ConfigLoader.balance.structures[configKey]!;
     final cost = config.cost;
-    final upkeep = config.upkeepEnergy;
+    final reserve = config.energyReserve;
     final canAfford = resources.canAfford(cost);
     final isSelected = game.buildManager.currentMode == mode;
 
@@ -122,7 +122,7 @@ class BuildPalette extends StatelessWidget {
                 ),
               ),
               Text(
-                '⚡$upkeep',
+                '⚡$reserve',
                 style: const TextStyle(
                   color: Colors.yellow,
                   fontSize: 10,
