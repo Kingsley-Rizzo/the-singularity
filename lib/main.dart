@@ -3,6 +3,7 @@ import 'package:flame/game.dart';
 import 'game/singularity_game.dart';
 import 'game/ui/game_hud.dart';
 import 'game/ui/build_palette.dart';
+import 'ui/menu_screen.dart';
 
 void main() {
   runApp(const SingularityApp());
@@ -17,8 +18,34 @@ class SingularityApp extends StatelessWidget {
       title: 'The Singularity',
       debugShowCheckedModeBanner: false,
       theme: ThemeData.dark(),
-      home: const GameScreen(),
+      home: const MenuWrapper(),
     );
+  }
+}
+
+class MenuWrapper extends StatefulWidget {
+  const MenuWrapper({Key? key}) : super(key: key);
+
+  @override
+  State<MenuWrapper> createState() => _MenuWrapperState();
+}
+
+class _MenuWrapperState extends State<MenuWrapper> {
+  bool _showMenu = true;
+
+  void _startGame() {
+    setState(() {
+      _showMenu = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_showMenu) {
+      return MenuScreen(onStartGame: _startGame);
+    } else {
+      return const GameScreen();
+    }
   }
 }
 

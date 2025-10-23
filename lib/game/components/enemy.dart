@@ -100,6 +100,16 @@ abstract class EnemyComponent extends PositionComponent
         }
 
         currentTarget = nearestTarget;
+
+        // If no buildings of target type exist, fall back to attacking AGI hub
+        if (currentTarget == null) {
+          for (final component in gameRef.world.children) {
+            if (component is AgiHubComponent) {
+              currentTarget = component;
+              break;
+            }
+          }
+        }
       }
     }
   }

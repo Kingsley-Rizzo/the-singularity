@@ -15,11 +15,12 @@ abstract class StructureComponent extends PositionComponent
   double structureSize = 30.0;
 
   bool isDestroyed = false;
+  Sprite? sprite;
 
   StructureComponent(this.structureType) : super(anchor: Anchor.center);
 
   @override
-  void onLoad() {
+  Future<void> onLoad() async {
     final config = ConfigLoader.balance.structures[structureType]!;
     maxHp = config.hp.toDouble();
     currentHp = maxHp;
@@ -29,7 +30,29 @@ abstract class StructureComponent extends PositionComponent
     agiPerTick = config.agiPerTick;
     size = Vector2.all(structureSize);
 
+    // Load sprite based on structure type
+    await loadSprite();
+
     gameRef.buildManager.registerStructure(this);
+  }
+
+  Future<void> loadSprite() async {
+    final spriteMap = {
+      'turret': 'Turret.png',
+      'energy_plant': 'EnergyPlant.png',
+      'server_farm': 'ServerFarm.png',
+    };
+
+    final spriteName = spriteMap[structureType];
+    if (spriteName != null) {
+      try {
+        print('Loading sprite for $structureType: config/sprites/$spriteName');
+        sprite = await gameRef.loadSprite('config/sprites/$spriteName');
+        print('Successfully loaded sprite for $structureType');
+      } catch (e) {
+        print('Failed to load sprite for $structureType: $e');
+      }
+    }
   }
 
   @override
@@ -54,33 +77,43 @@ abstract class StructureComponent extends PositionComponent
 
   @override
   void render(Canvas canvas) {
-    final paint = Paint()
-      ..color = getStructureColor()
-      ..style = PaintingStyle.fill;
+    // Draw sprite if available, otherwise fall back to colored rectangle
+    if (sprite != null) {
+      sprite!.render(
+        canvas,
+        position: Vector2.zero(),
+        size: Vector2.all(structureSize),
+      );
+    } else {
+      // Fallback to colored rectangle
+      final paint = Paint()
+        ..color = getStructureColor()
+        ..style = PaintingStyle.fill;
 
-    canvas.drawRect(
-      Rect.fromCenter(
-        center: Offset(structureSize / 2, structureSize / 2),
-        width: structureSize,
-        height: structureSize,
-      ),
-      paint,
-    );
+      canvas.drawRect(
+        Rect.fromCenter(
+          center: Offset(structureSize / 2, structureSize / 2),
+          width: structureSize,
+          height: structureSize,
+        ),
+        paint,
+      );
 
-    // Draw border
-    final borderPaint = Paint()
-      ..color = const Color(0xFFFFFFFF)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.0;
+      // Draw border
+      final borderPaint = Paint()
+        ..color = const Color(0xFFFFFFFF)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2.0;
 
-    canvas.drawRect(
-      Rect.fromCenter(
-        center: Offset(structureSize / 2, structureSize / 2),
-        width: structureSize,
-        height: structureSize,
-      ),
-      borderPaint,
-    );
+      canvas.drawRect(
+        Rect.fromCenter(
+          center: Offset(structureSize / 2, structureSize / 2),
+          width: structureSize,
+          height: structureSize,
+        ),
+        borderPaint,
+      );
+    }
 
     // Draw HP bar
     if (currentHp < maxHp) {

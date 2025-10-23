@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:flutter/material.dart';
 import 'structure.dart';
 import '../config/config_loader.dart';
 import 'enemy.dart';
@@ -16,8 +17,8 @@ class Turret extends StructureComponent {
   Turret() : super('turret');
 
   @override
-  void onLoad() {
-    super.onLoad();
+  Future<void> onLoad() async {
+    await super.onLoad();
 
     final config = ConfigLoader.balance.structures['turret']!;
     range = config.range!;
@@ -88,12 +89,37 @@ class Turret extends StructureComponent {
 
   @override
   Color getStructureColor() {
+    // Grey out when power is not OK (brownout)
+    if (!gameRef.resourceManager.isPowerOk) {
+      return const Color(0xFF404040); // Dark grey
+    }
     return const Color(0xFFFF0000); // Red
   }
 
   @override
   void render(Canvas canvas) {
     super.render(canvas);
+
+    // Add visual indication for brownout
+    if (!gameRef.resourceManager.isPowerOk) {
+      // Draw diagonal lines over the structure to indicate offline status
+      final linePaint = Paint()
+        ..color = Colors.red.withOpacity(0.6)
+        ..strokeWidth = 2.0
+        ..style = PaintingStyle.stroke;
+
+      // Draw X pattern
+      canvas.drawLine(
+        const Offset(0, 0),
+        Offset(structureSize, structureSize),
+        linePaint,
+      );
+      canvas.drawLine(
+        Offset(structureSize, 0),
+        Offset(0, structureSize),
+        linePaint,
+      );
+    }
 
     // Draw range circle in debug mode (optional)
     // Uncomment for debugging:

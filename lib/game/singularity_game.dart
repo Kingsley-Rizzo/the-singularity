@@ -8,6 +8,7 @@ import 'managers/wave_manager.dart';
 import 'managers/build_manager.dart';
 import 'components/agi_hub.dart';
 import 'components/arena.dart';
+import 'components/background.dart';
 import 'components/server_farm.dart';
 import 'components/energy_plant.dart';
 import 'components/turret.dart';
@@ -50,6 +51,10 @@ class SingularityGame extends FlameGame with TapCallbacks, HoverCallbacks {
 
     // Initialize resource manager with config values
     resourceManager.initialize();
+
+    // Add background first (rendered first)
+    final background = BackgroundComponent();
+    world.add(background);
 
     // Add arena boundary
     final arena = ArenaComponent();
