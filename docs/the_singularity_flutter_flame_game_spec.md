@@ -1,0 +1,326 @@
+# The Singularity — Technical Game Spec (Flutter + Flame)
+
+> **Purpose**: A complete, implementation-ready specification for a top‑down, spatial defense game using Flutter + Flame. Copy into your repo as `docs/game_spec.md`. Reference configs live in `/assets/config/`.
+
+---
+
+## 1) High‑Level Overview
+- **Genre**: Top‑down defense / base‑builder with light economy management
+- **Core Loop**: Build → Generate Money/Energy → Survive waves → Grow AGI → Win at 100% AGI
+- **Win/Lose**: Win when **AGI ≥ 100%**; Lose when **AGI ≤ 0%**
+- **Perspective**: Fixed camera centered on the AGI Hub, radial/free placement around center
+- **Aesthetic (MVP)**: Geometric primitives (circle hub, rectangles for buildings, triangles for enemies), minimal HUD
+
+---
+
+## 2) Platforms & Targets
+- **Targets**: Web (WASM/CanvasKit), Android, iOS (optional later), Desktop optional (later)
+- **Framerate**: 60 FPS target
+- **Resolution**: Adaptive; base design at 1280×720 logical pixels; UI scales via `FlameDevicePixelRatio` + responsive layout
+
+---
+
+## 3) Tech Stack
+- **Language/Engine**: Dart (3.9+), Flutter (3.35+), Flame (1.17+), flame_forge2d (optional later), flame_tiled (optional later)
+- **Packages** (MVP):
+  - `flame` (core game loop, components, timers)
+  - `flame_audio` (sfx/music; optional first pass)
+  - `provider` or `riverpod` for UI state (simple is fine)
+  - `json_annotation`, `build_runner`, `json_serializable` for config data
+- **Project Structure**: see §15
+
+---
+
+## 4) Game World & Camera
+- **World**: Finite circular or square arena with soft boundary (enemies spawn at edge rings)
+- **Camera**: Static centered on AGI Hub for MVP (no pan/zoom). Later: mild zoom on events.
+- **Grid**: Logical grid (e.g., 32 px cells) for snapping placement; free‑placement allowed within bounds (toggleable via config)
+
+---
+
+## 5) Systems
+### 5.1 Tick & Time
+- **Game tick**: `tick_ms = 500` (configurable). Every tick:
+  - Server Farms add **Money**
+  - Energy Plants add **Energy**
+  - Structures consume upkeep **Energy**
+  - AGI gains passive progress `agi += agi_passive_per_tick` if **Power OK**
+- **Delta‑time** used for movement/combat; tick used for economy & AGI.
+
+### 5.2 Resources
+- **Money**: Build/upgrade structures & turrets
+- **Energy**: Required to power structures/turrets; if negative → power outage penalties
+- **AGI**: Central progress / health. Hits from Philosophers reduce AGI; passive/wave bonuses increase AGI
+
+### 5.3 Construction / Placement
+- **Placement Modes**: Snap‑to‑grid (default) or free placement
+- **Build Flow**: Select structure → show ghost + valid cells → place if affordable and within radius (no‑overlap via simple AABB check)
+- **Refunds**: Sell returns 50% Money (configurable); Energy refunds are immediate (remove upkeep)
+
+### 5.4 Enemies & Waves
+- **Spawners**: Edge points evenly distributed around arena
+- **Waves**: Timer‑based (e.g., every `wave_interval_s = 20`) or trigger‑based (on clear)
+- **Targeting**: Each enemy picks nearest valid target based on type (Farm, Plant, or Hub)
+- **Pathing**: Straight‑line to target; simple obstacle avoidance later if needed
+
+### 5.5 Combat
+- **Turret**: Auto‑target nearest in range, fire at fixed fire‑rate, projectile hits deal Damage
+- **Damage**: Apply on hit; enemies die at HP ≤ 0; buildings destroyed at HP ≤ 0
+- **Contact Damage**: Enemy at target applies periodic damage (`contact_damage_interval_ms`)
+
+### 5.6 Power & Outages
+- If **Energy < 0** for `outage_grace_ms`, game enters **brownout**: turrets/structures pause; AGI passive halts. Visual cue: dim overlay.
+
+---
+
+## 6) Entities & Base Stats (Config‑Driven)
+| Entity | HP | Production | Cost | Upkeep (Energy) | Notes |
+|---|---:|---|---:|---:|---|
+| **AGI Hub** | — (uses `%` bar) | Passive `+agi/tick` | n/a | n/a | Center piece; receives damage from Philosophers; lose at 0% |
+| **Server Farm** | 100 | `+money_per_tick = 10` | `$100` | `10` | Targeted by Hackers |
+| **Energy Plant** | 100 | `+energy_per_tick = 8` | `$75` | `0` | Targeted by Saboteurs |
+| **Defense Turret** | 100 | `DPS via fire_rate & dmg` | `$50` | `5` | Targets nearest enemy in range |
+
+| Enemy | Target | HP | Speed (px/s) | Damage/Contact | Bounty (Money) |
+|---|---|---:|---:|---:|---:|
+| **Hacker** | Server Farm | 20 | 80 | 20 | 5 |
+| **Saboteur** | Energy Plant | 20 | 80 | 20 | 5 |
+| **Philosopher** | AGI Hub | 30 | 60 | 15 | 8 |
+
+- **All values are defaults**; override via JSON in `/assets/config/balance.json`.
+
+---
+
+## 7) Economy & Formulas
+- **Tick Income**: `money += Σ farms.money_per_tick`
+- **Tick Energy**: `energy += Σ plants.energy_per_tick − Σ upkeep`
+- **AGI Passive**: `agi += (power_ok ? agi_passive_per_tick : 0)`
+- **Wave Bonus** (optional): `agi += wave_clear_bonus`
+- **Sell Refund**: `refund = floor(build_cost * sell_refund_ratio)`
+
+---
+
+## 8) Wave Generation
+```json
+// assets/config/waves.json
+{
+  "wave_interval_s": 20,
+  "waves": [
+    { "time": 0,  "enemies": {"hacker": 5, "saboteur": 3} },
+    { "time": 20, "enemies": {"hacker": 6, "saboteur": 4, "philosopher": 1} },
+    { "time": 40, "enemies": {"hacker": 8, "saboteur": 5, "philosopher": 2} }
+  ],
+  "scaling": { "hp_mult_per_wave": 0.06, "count_mult_per_wave": 0.08 }
+}
+```
+- **Dynamic Mode**: If waves run out, auto‑scale counts and HP per wave using `scaling`.
+
+---
+
+## 9) JSON Balance & Content
+```json
+// assets/config/balance.json
+{
+  "tick_ms": 500,
+  "agi": {
+    "start_percent": 5,
+    "win_percent": 100,
+    "loss_percent": 0,
+    "passive_per_tick": 0.2,
+    "wave_clear_bonus": 2.0
+  },
+  "economy": {
+    "start_money": 200,
+    "start_energy": 20,
+    "sell_refund_ratio": 0.5,
+    "outage_grace_ms": 1500
+  },
+  "structures": {
+    "server_farm": { "hp": 100, "cost": 100, "upkeep_energy": 10, "money_per_tick": 10 },
+    "energy_plant": { "hp": 100, "cost": 75,  "upkeep_energy": 0,  "energy_per_tick": 8 },
+    "turret": { "hp": 100, "cost": 50,  "upkeep_energy": 5,  "range": 140, "fire_interval_ms": 600, "projectile_damage": 8, "projectile_speed": 220 }
+  },
+  "enemies": {
+    "hacker": { "hp": 20, "speed": 80, "contact_damage": 20, "bounty": 5 },
+    "saboteur": { "hp": 20, "speed": 80, "contact_damage": 20, "bounty": 5 },
+    "philosopher": { "hp": 30, "speed": 60, "contact_damage": 15, "bounty": 8 }
+  }
+}
+```
+
+---
+
+## 10) UI / UX
+- **HUD**: Top bar with Money, Energy, AGI%; timer/wave index; pause/settings
+- **Build Palette**: Bottom dock with buttons [Farm, Plant, Turret]; shows cost & upkeep
+- **Placement Feedback**: Ghost sprite (green valid / red invalid), overlap and cost checks
+- **Damage/Status FX**: Flash on hit; gray overlay on brownout; small pop‑ups for +$ bounty
+- **Tooltips**: Long‑press on UI item → tooltip with stats
+
+---
+
+## 11) Input
+- **Mouse/Touch**:
+  - Tap/click structure button → place mode
+  - Tap on map → attempt place
+  - Tap building → radial menu: **Sell**, (later: **Upgrade**)
+  - Drag optional for panning (disabled MVP)
+- **Keyboard** (web/desktop): `1/2/3` quick‑select build; `Esc` cancel; `P` pause
+
+---
+
+## 12) Audio (Optional MVP)
+- **SFX**: Place building, turret fire, enemy hit, structure destroyed, wave start/clear
+- **Music**: Low‑key ambient loop; intensity ramps per wave
+
+---
+
+## 13) Save/Load (Optional MVP)
+- **Local**: JSON snapshot to `SharedPreferences`/`LocalStorage`
+- **Contents**: resources, agi, wave idx, RNG seed, list of structures (type, pos, hp), enemies (type, pos, hp)
+
+---
+
+## 14) Code Architecture
+- **Game Root**: `class SingularityGame extends FlameGame with HasCollisionDetection` (later add `TapDetector`/`ScrollDetector` as needed)
+- **Managers**:
+  - `ResourceManager` (money, energy, agi)
+  - `WaveManager` (spawn timers, scaling)
+  - `BuildManager` (placement, cost checks, grid)
+  - `Config` (loads JSON to data classes)
+- **Components**:
+  - `AgiHubComponent` (center)
+  - `StructureComponent` (base) → `ServerFarm`, `EnergyPlant`, `Turret`
+  - `EnemyComponent` (base) → `Hacker`, `Saboteur`, `Philosopher`
+  - `ProjectileComponent`
+  - `SpawnerComponent` (edge spawn logic)
+- **Collision**: Circle/Rectangle hitboxes for projectiles/enemy contact
+- **Timers**: Flame `Timer` for tick, waves, turret firing
+
+---
+
+## 15) Directory Layout
+```
+lib/
+  main.dart
+  game/
+    singularity_game.dart
+    config/ (models + loader)
+    managers/
+      build_manager.dart
+      resource_manager.dart
+      wave_manager.dart
+    components/
+      agi_hub.dart
+      structure.dart
+      server_farm.dart
+      energy_plant.dart
+      turret.dart
+      enemy.dart
+      enemies/{hacker.dart,saboteur.dart,philosopher.dart}
+      projectile.dart
+    ui/
+      hud.dart
+      build_palette.dart
+      tooltips.dart
+assets/
+  config/
+    balance.json
+    waves.json
+  audio/ (optional)
+  images/ (optional primitive textures)
+```
+
+---
+
+## 16) Data Models (Dart)
+- Use `json_serializable` with `@JsonSerializable()` for `Balance`, `StructuresConfig`, `EnemiesConfig`, `WaveConfig`.
+- **Minimal example**:
+```dart
+class StructureStats { final int hp; final int cost; final int upkeepEnergy; StructureStats({required this.hp,required this.cost,required this.upkeepEnergy}); }
+class TurretStats extends StructureStats { final double range; final int fireIntervalMs; final int projectileDamage; final double projectileSpeed; TurretStats({required super.hp, required super.cost, required super.upkeepEnergy, required this.range, required this.fireIntervalMs, required this.projectileDamage, required this.projectileSpeed}); }
+```
+
+---
+
+## 17) Algorithms (Key)
+- **Nearest Target (Enemy)**: iterate structures by type + hub; compute squared distance; choose min
+- **Turret Targeting**: keep current target while within range, else reacquire nearest within `range`
+- **Projectile Flight**: constant speed toward target’s current position; on collision → apply damage, destroy projectile
+- **Overlap Check (Placement)**: AABB intersects any existing structure AABB ⇒ invalid
+
+---
+
+## 18) Balancing & Difficulty
+- **Knobs**: `tick_ms`, per‑entity hp/cost/upkeep, turret range/fire rate/damage, wave interval, scaling multipliers
+- **Expectations** (MVP):
+  - Players can place 1–2 Farms, 1 Plant, 1–2 Turrets before Wave 2
+  - Brownout risk if Farms outpace Plants
+
+---
+
+## 19) Debug Tools
+- **Debug Overlay**: show grids, hitboxes, fps, resource deltas
+- **Cheats**: `F6` +$100, `F7` +Energy 50, `F8` spawn wave now, `F9` clear all enemies
+
+---
+
+## 20) Build & Run
+- **pubspec.yaml (snippet)**:
+```yaml
+dependencies:
+  flutter: any
+  flame: ^1.17.0
+  flame_audio: ^2.10.0
+  provider: ^6.0.0
+  json_annotation: ^4.9.0
+
+dev_dependencies:
+  build_runner: ^2.4.0
+  json_serializable: ^6.9.0
+```
+- **Assets**: add `/assets/config/` to `pubspec.yaml` under `flutter.assets`
+
+---
+
+## 21) Acceptance Criteria (MVP)
+1. Game loads with AGI Hub centered; HUD shows Money/Energy/AGI/Wave.
+2. Can place Farm/Plant/Turret with cost/upkeep checks and grid snapping.
+3. Economy ticks correctly; negative Energy triggers brownout within grace period.
+4. Waves spawn from edges; enemies move toward type‑correct targets.
+5. Turrets auto‑fire; enemies/structures take damage and can be destroyed.
+6. AGI increases passively; wave clear grants bonus; reaches 100% for win, 0% for loss.
+
+---
+
+## 22) Open Questions / Decisions
+1. **Placement**: Strict grid only, or allow free placement toggle in settings? 
+- grid only
+2. **Brownout Behavior**: Pause *all* structures/turrets or only turrets during brownout?
+- pause all structures
+3. **Wave Scheduling**: Fixed timer, or “start next wave” button with bonus for early start?
+- fixed timer only
+4. **Upgrades**: Include basic structure/turret upgrades in MVP or defer?
+- lets defer upgrade system for now
+5. **Sell Refund Ratio**: 50% okay for MVP?
+- yes
+6. **Audio**: Include SFX pass in MVP?
+- ignore sound for now
+7. **Mobile UX**: One‑finger placement only, or add two‑finger pan/zoom now?
+- one finger placement, with no panning or zooming for now
+8. **Difficulty Modes**: Easy/Normal/Hard presets now, or one balanced mode for MVP?
+- lets keep it one balanced mode
+9. **Save/Load**: Include quick‑save on pause, or ship later?
+- lets add pause for now and no quick save
+10. **Aesthetic**: Pure primitives vs. minimal sprites for clarity (colors & icon set)?
+- pure primitives. if time allows we will load our own sprites.
+
+---
+
+## 23) Future Work (Post‑MVP)
+- Structure/turret upgrades & tech tree
+- Obstacles/maze building; proper pathfinding (A*)
+- Boss enemies; elite affixes
+- Status effects (slow, splash, chain lightning)
+- Achievements & run stats
+
