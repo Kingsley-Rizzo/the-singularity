@@ -1,0 +1,103 @@
+// **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
+BalanceConfig _$BalanceConfigFromJson(Map<String, dynamic> json) =>
+    BalanceConfig(
+      tickMs: (json['tick_ms'] as num).toInt(),
+      agi: AgiConfig.fromJson(json['agi'] as Map<String, dynamic>),
+      economy: EconomyConfig.fromJson(json['economy'] as Map<String, dynamic>),
+      structures: (json['structures'] as Map<String, dynamic>).map(
+        (k, e) =>
+            MapEntry(k, StructureConfig.fromJson(e as Map<String, dynamic>)),
+      ),
+      enemies: (json['enemies'] as Map<String, dynamic>).map(
+        (k, e) => MapEntry(k, EnemyConfig.fromJson(e as Map<String, dynamic>)),
+      ),
+    );
+
+Map<String, dynamic> _$BalanceConfigToJson(BalanceConfig instance) =>
+    <String, dynamic>{
+      'tick_ms': instance.tickMs,
+      'agi': instance.agi,
+      'economy': instance.economy,
+      'structures': instance.structures,
+      'enemies': instance.enemies,
+    };
+
+AgiConfig _$AgiConfigFromJson(Map<String, dynamic> json) => AgiConfig(
+      startPercent: (json['start_percent'] as num).toDouble(),
+      winPercent: (json['win_percent'] as num).toDouble(),
+      lossPercent: (json['loss_percent'] as num).toDouble(),
+      passivePerTick: (json['passive_per_tick'] as num).toDouble(),
+      waveClearBonus: (json['wave_clear_bonus'] as num).toDouble(),
+    );
+
+Map<String, dynamic> _$AgiConfigToJson(AgiConfig instance) => <String, dynamic>{
+      'start_percent': instance.startPercent,
+      'win_percent': instance.winPercent,
+      'loss_percent': instance.lossPercent,
+      'passive_per_tick': instance.passivePerTick,
+      'wave_clear_bonus': instance.waveClearBonus,
+    };
+
+EconomyConfig _$EconomyConfigFromJson(Map<String, dynamic> json) =>
+    EconomyConfig(
+      startMoney: (json['start_money'] as num).toInt(),
+      startEnergy: (json['start_energy'] as num).toInt(),
+      sellRefundRatio: (json['sell_refund_ratio'] as num).toDouble(),
+      outageGraceMs: (json['outage_grace_ms'] as num).toInt(),
+    );
+
+Map<String, dynamic> _$EconomyConfigToJson(EconomyConfig instance) =>
+    <String, dynamic>{
+      'start_money': instance.startMoney,
+      'start_energy': instance.startEnergy,
+      'sell_refund_ratio': instance.sellRefundRatio,
+      'outage_grace_ms': instance.outageGraceMs,
+    };
+
+StructureConfig _$StructureConfigFromJson(Map<String, dynamic> json) =>
+    StructureConfig(
+      hp: (json['hp'] as num).toInt(),
+      cost: (json['cost'] as num).toInt(),
+      upkeepEnergy: (json['upkeep_energy'] as num).toInt(),
+      moneyPerTick: (json['money_per_tick'] as num).toInt(),
+      energyPerTick: (json['energy_per_tick'] as num).toInt(),
+      range: (json['range'] as num?)?.toDouble(),
+      fireIntervalMs: (json['fire_interval_ms'] as num?)?.toInt(),
+      projectileDamage: (json['projectile_damage'] as num?)?.toInt(),
+      projectileSpeed: (json['projectile_speed'] as num?)?.toDouble(),
+    );
+
+Map<String, dynamic> _$StructureConfigToJson(StructureConfig instance) =>
+    <String, dynamic>{
+      'hp': instance.hp,
+      'cost': instance.cost,
+      'upkeep_energy': instance.upkeepEnergy,
+      'money_per_tick': instance.moneyPerTick,
+      'energy_per_tick': instance.energyPerTick,
+      'range': instance.range,
+      'fire_interval_ms': instance.fireIntervalMs,
+      'projectile_damage': instance.projectileDamage,
+      'projectile_speed': instance.projectileSpeed,
+    };
+
+EnemyConfig _$EnemyConfigFromJson(Map<String, dynamic> json) => EnemyConfig(
+      hp: (json['hp'] as num).toInt(),
+      speed: (json['speed'] as num).toDouble(),
+      contactDamage: (json['contact_damage'] as num).toInt(),
+      contactIntervalMs: (json['contact_interval_ms'] as num).toInt(),
+      bounty: (json['bounty'] as num).toInt(),
+      targetType: json['target_type'] as String,
+    );
+
+Map<String, dynamic> _$EnemyConfigToJson(EnemyConfig instance) =>
+    <String, dynamic>{
+      'hp': instance.hp,
+      'speed': instance.speed,
+      'contact_damage': instance.contactDamage,
+      'contact_interval_ms': instance.contactIntervalMs,
+      'bounty': instance.bounty,
+      'target_type': instance.targetType,
+    };

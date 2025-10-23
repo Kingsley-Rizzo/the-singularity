@@ -1,0 +1,35 @@
+{
+  "wave_interval_s": 20,
+  "waves": [
+    {
+      "time": 0,
+      "enemies": {
+        "hacker": 5,
+        "saboteur": 3,
+        "philosopher": 0
+      }
+    },
+    {
+      "time": 20,
+      "enemies": {
+        "hacker": 6,
+        "saboteur": 4,
+        "philosopher": 1
+      }
+    },
+    {
+      "time": 40,
+      "enemies": {
+        "hacker": 8,
+        "saboteur": 5,
+        "philosopher": 2
+      }
+    }
+  ],
+  "scaling": {
+    "hp_mult_per_wave": 0.06,
+    "count_mult_per_wave": 0.08
+  }
+}
+
+
