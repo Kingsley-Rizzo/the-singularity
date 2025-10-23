@@ -49,10 +49,8 @@ class _GameScreenState extends State<GameScreen> {
           Positioned.fill(
             child: GameHUD(game: game),
           ),
-          // Build palette overlay
-          Positioned.fill(
-            child: BuildPalette(game: game),
-          ),
+          // Build palette overlay (has its own positioning)
+          BuildPalette(game: game),
         ],
       ),
     );
