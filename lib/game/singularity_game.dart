@@ -7,6 +7,7 @@ import 'managers/resource_manager.dart';
 import 'managers/wave_manager.dart';
 import 'managers/build_manager.dart';
 import 'components/agi_hub.dart';
+import 'components/arena.dart';
 import 'components/server_farm.dart';
 import 'components/energy_plant.dart';
 import 'components/turret.dart';
@@ -45,6 +46,10 @@ class SingularityGame extends FlameGame with TapCallbacks, HoverCallbacks {
 
     // Initialize resource manager with config values
     resourceManager.initialize();
+
+    // Add arena boundary
+    final arena = ArenaComponent();
+    world.add(arena);
 
     // Add AGI Hub at center of world
     hub = AgiHubComponent();
@@ -221,17 +226,7 @@ class SingularityGame extends FlameGame with TapCallbacks, HoverCallbacks {
   void render(Canvas canvas) {
     super.render(canvas);
 
-    // Draw arena boundary
-    final paint = Paint()
-      ..color = Colors.white.withOpacity(0.2)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2;
-
-    canvas.drawCircle(
-      Offset.zero,
-      400,
-      paint,
-    );
+    // Arena boundary is now a component in the world
 
     // Draw grid (optional, for debugging)
     /*
@@ -256,9 +251,12 @@ class SingularityGame extends FlameGame with TapCallbacks, HoverCallbacks {
     }
     */
 
-    // Draw placement ghost
+    // Draw placement ghost - transform world to screen coordinates
     if (buildManager.currentMode != PlacementMode.none &&
         ghostPosition != null) {
+      final screenPos =
+          camera.viewfinder.transform.localToGlobal(ghostPosition!);
+
       final ghostPaint = Paint()
         ..color = canPlaceGhost
             ? Colors.green.withOpacity(0.5)
@@ -266,7 +264,7 @@ class SingularityGame extends FlameGame with TapCallbacks, HoverCallbacks {
 
       canvas.drawRect(
         Rect.fromCenter(
-          center: Offset(ghostPosition!.x, ghostPosition!.y),
+          center: Offset(screenPos.x, screenPos.y),
           width: 30,
           height: 30,
         ),

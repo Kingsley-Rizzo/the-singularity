@@ -43,9 +43,16 @@ class _GameScreenState extends State<GameScreen> {
     return Scaffold(
       body: Stack(
         children: [
+          // Game canvas (bottom layer)
           GameWidget(game: game),
-          GameHUD(game: game),
-          BuildPalette(game: game),
+          // HUD overlay (allows tap-through except on buttons)
+          Positioned.fill(
+            child: GameHUD(game: game),
+          ),
+          // Build palette overlay
+          Positioned.fill(
+            child: BuildPalette(game: game),
+          ),
         ],
       ),
     );
