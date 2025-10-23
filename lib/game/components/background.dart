@@ -7,15 +7,23 @@ import '../singularity_game.dart';
 class BackgroundComponent extends PositionComponent
     with HasGameRef<SingularityGame> {
   late List<List<double>> noiseGrid;
-  final int gridWidth = 64;
-  final int gridHeight = 36;
+  late int gridWidth;
+  late int gridHeight;
   final double cellSize = 32.0; // Size of each grid cell
 
-  BackgroundComponent() : super(anchor: Anchor.center);
+  BackgroundComponent() : super(anchor: Anchor.topLeft);
 
   @override
   Future<void> onLoad() async {
-    position = Vector2.zero();
+    // Get the game viewport size
+    final viewportSize = gameRef.camera.viewport.size;
+
+    // Calculate grid dimensions to fill the screen (with extra padding for any viewport)
+    gridWidth = ((viewportSize.x / cellSize) * 2).ceil();
+    gridHeight = ((viewportSize.y / cellSize) * 2).ceil();
+
+    // Position at top-left of the visible area (centered around origin)
+    position = Vector2(-viewportSize.x, -viewportSize.y);
     size = Vector2(gridWidth * cellSize, gridHeight * cellSize);
 
     // Generate perlin-like noise
@@ -86,8 +94,8 @@ class BackgroundComponent extends PositionComponent
           ..style = PaintingStyle.fill;
 
         final rect = Rect.fromLTWH(
-          x * cellSize - size.x / 2,
-          y * cellSize - size.y / 2,
+          x * cellSize,
+          y * cellSize,
           cellSize,
           cellSize,
         );
@@ -104,16 +112,16 @@ class BackgroundComponent extends PositionComponent
 
     for (int x = 0; x <= gridWidth; x++) {
       canvas.drawLine(
-        Offset(x * cellSize - size.x / 2, -size.y / 2),
-        Offset(x * cellSize - size.x / 2, size.y / 2),
+        Offset(x * cellSize, 0),
+        Offset(x * cellSize, size.y),
         gridPaint,
       );
     }
 
     for (int y = 0; y <= gridHeight; y++) {
       canvas.drawLine(
-        Offset(-size.x / 2, y * cellSize - size.y / 2),
-        Offset(size.x / 2, y * cellSize - size.y / 2),
+        Offset(0, y * cellSize),
+        Offset(size.x, y * cellSize),
         gridPaint,
       );
     }
